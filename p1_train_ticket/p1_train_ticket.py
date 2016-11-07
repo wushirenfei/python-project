@@ -1,26 +1,27 @@
-#!/usr/bin/python3.4
+#!/home/alex/local/python_evns/web_env/bin/python
 # -*- coding=utf-8 -*-
-import requests
-import pprint
-import sys
 
 
-def search_tickets():
-    url = 'https://kyfw.12306.cn/otn/leftTicket/queryX?leftTicketDTO.train_date=2016-11-08&leftTicketDTO.from_station=AOH&leftTicketDTO.to_station=HFH&purpose_codes=ADULT'
-           
-    headers = {'Content-Type':'application/json'}
-    response = requests.get(url, headers=headers, verify=False)
-    
-    pprint.pprint(response.text)
-    
+"""Naval Fate.
 
+Usage:
+  naval_fate.py ship new <name>...
+  naval_fate.py ship <name> move <x> <y> [--speed=<kn>]
+  naval_fate.py ship shoot <x> <y>
+  naval_fate.py mine (set|remove) <x> <y> [--moored | --drifting]
+  naval_fate.py (-h | --help)
+  naval_fate.py --version
 
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  --speed=<kn>  Speed in knots [default: 10].
+  --moored      Moored (anchored) mine.
+  --drifting    Drifting mine.
 
-def main():
-    print(sys.argv)
-    print(sys.kwargs)
-    # from_station, to_station = sys.argv[1], sys.argv[2]
-
+"""
+from docopt import docopt
 
 if __name__ == '__main__':
-    main()
+    arguments = docopt(__doc__, version='Naval Fate 2.0')
+    print(arguments)
