@@ -1,0 +1,80 @@
+#!/usr/bin/python3.4
+# -*- coding=utf-8 -*-
+import json
+import requests
+import pprint
+import sys
+
+
+def param_valid():
+    arg_len, option = len(sys.argv), '-g -d -z -t -k -h'.split()
+
+    if ('--help' or '-h' in sys.argv) and arg_len ==2:
+        print('tickets [-gdztk] from_station to_station train_date\n')
+        print('Option: ')
+        print('-h, --help   显示帮助菜单')
+        print('-g:          高铁')
+        print('-d:          动车')
+        print('-z:          直达')
+        print('-t:          特快')
+        print('-k:          快客')
+        sys.exit()
+    elif arg_len == 5 and sys.argv[1] in option:
+        return True
+    elif arg_len == 4 and sys.argv[1] not in option:
+        return False
+    else:
+        print('Using with wrong params.\
+              \ntickets [-gdztk] from_station to_station train_date\n')
+        sys.exit()
+
+# def search_tickets(from_station, to_statton, date, filter_flag=False):
+def search_tickets():
+    url = 'https://kyfw.12306.cn/otn/leftTicket/queryX?leftTicketDTO.train_date=2016-11-08&leftTicketDTO.from_station=SZH&leftTicketDTO.to_station=HFH&purpose_codes=ADULT'
+           
+    headers = {'Content-Type':'application/json'}
+    response = requests.get(url, headers=headers, verify=False)
+    #
+    # print(type(response.text))
+    # pprint.pprint(json.loads(response.text)['data'][0])
+    return json.loads(response.text)['data']
+
+def show_data(trains):
+    print('----------------------------------------------------------------------------')
+    print('| 车次 | 始发站 | 终点站 | 出发站 | 到达站 | 历时 | 商务座 | 特等座 |一等座 | 二等座 | 无座 |')
+    print('----------------------------------------------------------------------------')
+    if not trains:
+        line_show('')
+        return
+    for train in trains:
+        line_show(train)
+
+def line_show(train):
+    print('| {} | {} | {} | {} | {} | {} | {} | {} | {} |'.format(
+        train.get('station_train_code'),
+        train.get('start_station_name'),
+        train.get('end_station_name'),
+        train.get('from_station_name'),
+        train.get('to_station_name'),
+        train.get('lishi'),
+        train.get('start_station_name'),
+
+    ))
+    print('----------------------------------------------------------------------------')
+
+def main():
+    # print(sys.argv)
+    # filter_flag = param_valid()
+    # fs, ts, date = sys.argv[2:] if filter_flag else sys.argv[1:]
+    # trains = search_tickets(from_station=fs, to_statton=ts,
+    #                         date=date, filter_flag=
+
+
+    trains = search_tickets()
+    pprint.pprint(trains[0])
+    # show_data(1)
+
+    # from_station, to_station = sys.argv[1], sys.argv[2]
+
+if __name__ == '__main__':
+    main()
