@@ -1,0 +1,103 @@
+#!/home/alex/local/python_evns/py3.4/bin/python
+# -*- coding=utf-8 -*-
+"""Ticket Query.
+
+Usage:
+  ticket [-gdztk] <from_station> <to_station> <train_date>
+  ticket (-h | --help)
+  ticket --version
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  -g            高铁.
+  -d            动车.
+  -z            直达.
+  -t            特快.
+  -k            快客.
+
+"""
+import re
+import json
+import requests
+
+from prettytable import PrettyTable
+from docopt import docopt
+from stations import stations
+
+requests.packages.urllib3.disable_warnings()
+
+
+def color(text, color=None):
+    colors = {'red': 91, 'green': 92}
+    return '\033[{}m{}\033[0m'.format(colors.get(color), text)
+
+
+def search_tickets(from_station, to_station, date):
+    url = 'https://kyfw.12306.cn/otn/leftTicket/queryX?' \
+          'leftTicketDTO.train_date={}&' \
+          'leftTicketDTO.from_station={}&' \
+          'leftTicketDTO.to_station={}&' \
+          'purpose_codes=ADULT'.format(date, from_station, to_station)
+    headers = {'Content-Type': 'application/json'}
+    try:
+        response = requests.get(url, headers=headers, verify=False)
+        return json.loads(response.text)['data']
+    except:
+        return None
+
+
+def show_data(trains, conditions):
+    if not trains:
+        print('没有查询结果。')
+        return
+    else:
+        table = PrettyTable(['车次', '始发/终点站', '出发站', '到达站', '时间',
+                             '历时', '一等座', '二等座', '硬 座', '无 座'])
+        for train in trains:
+            data = train['queryLeftNewDTO']
+            if data.get('station_train_code')[0] not in conditions:
+                continue
+            table.add_row([
+                data.get('station_train_code'),
+                '{}\n{}'.format(
+                    color(data.get('start_station_name'), 'red'),
+                    color(data.get('end_station_name'), 'green')),
+                data.get('from_station_name'),
+                data.get('to_station_name'),
+                '{}\n{}'.format(
+                    color(data.get('start_time'), 'red'),
+                    color(data.get('arrive_time'), 'green')),
+                data.get('lishi'),
+                data.get('zy_num'),
+                data.get('ze_num'),
+                data.get('yz_num'),
+                data.get('wz_num'),
+            ])
+        print(table)
+
+
+def main():
+    arguments = docopt(__doc__, version='Ticket Query 1.0')
+    if not re.match(r'\d{4}-\d{2}-\d{2}', arguments.get('<train_date>')):
+        print('No ticket in {}'.format(arguments.get('<train_date>')))
+        return
+
+    fs = stations.get(arguments['<from_station>'], None)
+    ts = stations.get(arguments['<to_station>'], None)
+    if fs is None or ts is None:
+        print('No ticket with search station.')
+        return
+
+    conditions, default_conditions = [], ['G', 'D', 'Z', 'T', 'K']
+    for key, value in arguments.items():
+        if re.match(r'^-[gdztk]$', key) and value:
+            conditions.append(key[-1].upper())
+    cond = conditions or default_conditions
+    trains = search_tickets(fs, ts, arguments.get('<train_date>'))
+
+    show_data(trains, cond)
+
+
+if __name__ == '__main__':
+    main()
