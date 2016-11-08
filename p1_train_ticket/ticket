@@ -3,7 +3,7 @@
 """Ticket Query.
 
 Usage:
-  ticket [-gdztk] <from_station> <to_station> <train_date>
+  ticket [-gdztk] <from_station> <to_station> [<train_date>]
   ticket (-h | --help)
   ticket --version
 
@@ -15,11 +15,13 @@ Options:
   -z            直达.
   -t            特快.
   -k            快客.
+  <train_date>  默认今天.
 
 """
 import re
 import json
 import requests
+import datetime
 
 from prettytable import PrettyTable
 from docopt import docopt
@@ -78,23 +80,26 @@ def show_data(trains, conditions):
 
 
 def main():
-    arguments = docopt(__doc__, version='Ticket Query 1.0')
-    if not re.match(r'\d{4}-\d{2}-\d{2}', arguments.get('<train_date>')):
-        print('No ticket in {}'.format(arguments.get('<train_date>')))
+    args = docopt(__doc__, version='Ticket Query 1.0')
+    args['<train_date>'] = args['<train_date>'] or \
+                           datetime.date.today().strftime('%Y-%m-%d')
+
+    if not re.match(r'\d{4}-\d{2}-\d{2}', args.get('<train_date>')):
+        print('No ticket in {}'.format(args.get('<train_date>')))
         return
 
-    fs = stations.get(arguments['<from_station>'], None)
-    ts = stations.get(arguments['<to_station>'], None)
+    fs = stations.get(args['<from_station>'], None)
+    ts = stations.get(args['<to_station>'], None)
     if fs is None or ts is None:
         print('No ticket with search station.')
         return
 
     conditions, default_conditions = [], ['G', 'D', 'Z', 'T', 'K']
-    for key, value in arguments.items():
+    for key, value in args.items():
         if re.match(r'^-[gdztk]$', key) and value:
             conditions.append(key[-1].upper())
     cond = conditions or default_conditions
-    trains = search_tickets(fs, ts, arguments.get('<train_date>'))
+    trains = search_tickets(fs, ts, args.get('<train_date>'))
 
     show_data(trains, cond)
 
