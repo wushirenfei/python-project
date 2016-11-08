@@ -4,3 +4,4 @@ This project is a collection of implementations for http://gold.xitu.io/entry/57
 
 
 ##Train ticket searching tool has been implemented by Python3.4.3
+Read detail: https://github.com/wushirenfei/python-project/blob/master/p1_train_ticket/README.md
