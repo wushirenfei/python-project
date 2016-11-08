@@ -54,7 +54,7 @@ def show_data(trains, conditions):
         print('没有查询结果。')
         return
     else:
-        table = PrettyTable(['车次', '始发/终点站', '出发站', '到达站', '时间',
+        table = PrettyTable(['车次', '始发/终点站', '出发站/到达站', '时间',
                              '历时', '一等座', '二等座', '硬 座', '无 座'])
         for train in trains:
             data = train['queryLeftNewDTO']
@@ -62,14 +62,12 @@ def show_data(trains, conditions):
                 continue
             table.add_row([
                 data.get('station_train_code'),
-                '{}\n{}'.format(
-                    color(data.get('start_station_name'), 'red'),
-                    color(data.get('end_station_name'), 'green')),
-                data.get('from_station_name'),
-                data.get('to_station_name'),
-                '{}\n{}'.format(
-                    color(data.get('start_time'), 'red'),
-                    color(data.get('arrive_time'), 'green')),
+                '{}\n{}'.format(color(data.get('start_station_name'), 'red'),
+                                color(data.get('end_station_name'), 'green')),
+                '{}\n{}'.format(color(data.get('from_station_name'), 'red'),
+                                color(data.get('to_station_name'), 'green')),
+                '{}\n{}'.format(color(data.get('start_time'), 'red'),
+                                color(data.get('arrive_time'), 'green')),
                 data.get('lishi'),
                 data.get('zy_num'),
                 data.get('ze_num'),
