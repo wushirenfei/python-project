@@ -3,75 +3,34 @@
 from PIL import Image,ImageDraw, ImageFont, ImageFilter
 import random
 
-class VerifyCode():
+class ImageOpt(object):
 
     def __init__(self):
-        self._letter_cases = 'abcdefghjkmnpqrstuvwxy'
-        self._upper_cases = self._letter_cases.upper()
-        self._numbers = ''.join(map(str, range(3, 10)))
-        pass
+        self._font_type, self._font_size = 'Ubuntu-C.ttf', 18
+        self._bg_color, self._fg_color = (255, 255, 255), (0, 0, 255)
+        self._diagram_size = (120, 30)
+        self._mode = 'RGB'
 
-    def createCodeImage(self,size=(120,30),img_type='jpg',
-                        mode='RGB',bg_color=(255,255,255),fg_color=(0,0,255),
-                            font_size=18,font_type='Ubuntu-C.ttf',
-                            # font_size=18, font_type='arial.ttf',
-                            length=4,draw_lines=True,n_line=(1,2),
-                            draw_points=True,point_chance=2):
-        width,height = size;
-        img = Image.new(mode, size, bg_color);
-        draw = ImageDraw.Draw(img)
+    def make_valid_diagram(self, **kwargs):
 
-        def get_chars():
-            return random.sample(self._letter_cases,length)
-
-        def creat_line():
-            line_num = random.randint(*n_line)#sign that the param is a list
-
-            for i in range(line_num):
-                begin = (random.randint(0, size[0]), random.randint(0, size[1]))
-                end = (random.randint(0, size[0]), random.randint(0, size[1]))
-                draw.line([begin, end], fill=(0, 0, 0))
-
-        def create_points():
-            chance = min(100, max(0, int(point_chance)))
-            for w in range(width):
-                for h in range(height):
-                    tmp = random.randint(0, 100)
-                    if tmp > 100 - chance:
-                        draw.point((w, h), fill=(0, 0, 0))
+        diagram = Image.new(
+            mode=kwargs.get('mode') or self._mode,
+            size=kwargs.get('size') or self._diagram_size,
+            color=kwargs.get('color') or self._bg_color
+        )
+        diagram
 
 
 
-        def create_strs():
-            c_chars = get_chars()
-            strs = ' %s ' % ' '.join(c_chars)
-            font = ImageFont.truetype(font_type, font_size)
-            font_width, font_height = font.getsize(strs)
-            draw.text(((width - font_width) / 3, (height - font_height) / 3),
-                        strs, font=font, fill=fg_color)
-            return ''.join(c_chars)
+    @staticmethod
+    def random_code():
+        collection = [x for x in range(48, 58)] + \
+                     [x for x in range(65, 91)] + \
+                     [x for x in range(97, 113)]
 
+        return [chr(collection[random.randint(0, len(collection))-1])
+                for i in range(4)]
 
-
-        if draw_lines:
-            creat_line()
-        if draw_points:
-            create_points()
-        strs = create_strs()
-
-        params = [1 - float(random.randint(1, 2)) / 100,
-                  0,
-                  0,
-                  0,
-                  1 - float(random.randint(1, 10)) / 100,
-                  float(random.randint(1, 2)) / 500,
-                  0.001,
-                  float(random.randint(1, 2)) / 500
-                  ]
-        img = img.transform(size, Image.PERSPECTIVE, params)
-        img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)
-        return img, strs
 
 if __name__ == '__main__':
-    code_img,capacha_code= VerifyCode().createCodeImage()
-    code_img.save('xx.jpg','JPEG')
+    print(ImageOpt.random_code())
