@@ -74,4 +74,5 @@ class VerifyCode():
 
 if __name__ == '__main__':
     code_img,capacha_code= VerifyCode().createCodeImage()
+    print(capacha_code)
     code_img.save('xx.jpg','JPEG')

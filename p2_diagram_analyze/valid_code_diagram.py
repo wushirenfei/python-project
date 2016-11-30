@@ -24,6 +24,7 @@ class ImageOpt(object):
 
     @staticmethod
     def random_code():
+        # random char including [a-z], [A-Z] and [0-9]
         collection = [x for x in range(48, 58)] + \
                      [x for x in range(65, 91)] + \
                      [x for x in range(97, 113)]
